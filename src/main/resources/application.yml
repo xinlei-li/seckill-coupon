@@ -1,0 +1,53 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: seckill-coupon
+
+  # JDK 21 虚拟线程：IO 密集型接口不用再调线程池
+  threads:
+    virtual:
+      enabled: true
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/seckill?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&useSSL=false
+    username: ${DB_USER:root}
+    password: ${DB_PASSWORD}
+    hikari:
+      maximum-pool-size: 20
+      minimum-idle: 5
+
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      timeout: 2s
+
+  kafka:
+    bootstrap-servers: localhost:9092
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+      acks: all
+      properties:
+        enable.idempotence: true
+        max.in.flight.requests.per.connection: 5
+    consumer:
+      group-id: seckill-order-cg
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      enable-auto-commit: false
+      auto-offset-reset: earliest
+      max-poll-records: 50
+    listener:
+      ack-mode: manual_immediate
+      concurrency: 3
+
+seckill:
+  order-timeout-minutes: 15
+  warmup-ahead-hours: 2
+
+logging:
+  level:
+    com.example.seckill: debug
